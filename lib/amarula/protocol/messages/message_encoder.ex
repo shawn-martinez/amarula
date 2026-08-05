@@ -437,11 +437,15 @@ defmodule Amarula.Protocol.Messages.MessageEncoder do
   end
 
   defp media_message(:document, common, opts) do
+    # :caption included since 2026-08-04 — DocumentMessage has carried a caption
+    # field (20) for years and official clients render it under the file bubble,
+    # but this clause silently dropped the opt while :image/:video honored it.
+    # Callers passing caption: on documents got a bare file with no way to tell.
     %Proto.Message{
       documentMessage:
         struct(
           Proto.Message.DocumentMessage,
-          Map.merge(common, take(opts, [:title, :file_name, :page_count, :jpeg_thumbnail]))
+          Map.merge(common, take(opts, [:caption, :title, :file_name, :page_count, :jpeg_thumbnail]))
         )
     }
   end
